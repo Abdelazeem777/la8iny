@@ -47,7 +47,7 @@ class _SignupPageState extends State<SignupPage> {
               if (state.isLoaded) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Welcome ${state.user?.name}'),
+                    content: Text('Welcome ${state.user?.fullname}'),
                   ),
                 );
               } else if (state.isError) {

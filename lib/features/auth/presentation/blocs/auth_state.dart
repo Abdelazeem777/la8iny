@@ -22,12 +22,12 @@ class AuthState {
   });
 
   AuthState copyWith({
-    AuthStatus? state,
+    AuthStatus? status,
     ValueGetter<User?>? user,
     String? message,
   }) {
     return AuthState(
-      status: state ?? this.status,
+      status: status ?? this.status,
       user: user != null ? user() : this.user,
       message: message ?? this.message,
     );

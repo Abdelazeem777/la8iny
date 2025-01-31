@@ -7,6 +7,12 @@ class AuthRepoImpl implements AuthRepo {
   Future<User> login(String email, String password) async {
     await Future.delayed(const Duration(seconds: 2));
 
-    return User(name: 'Abdelazeem Kuratem "قريطم"', email: email);
+    return User(fullname: 'Abdelazeem Kuratem "قريطم"', email: email);
+  }
+
+  @override
+  Future<User> signup(String fullname, String email, String password) {
+    // TODO: implement signup
+    throw UnimplementedError();
   }
 }
