@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:la8iny/auth/presentation/repo/auth_repo.dart';
+import 'package:la8iny/features/auth/presentation/repo/auth_repo.dart';
 
 import '../../data/models/user_model.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:la8iny/auth/data/repo/auth_repo_impl.dart';
+import 'package:la8iny/features/auth/data/repo/auth_repo_impl.dart';
 import 'package:la8iny/core/di/service_locator.dart';
 
 import '../blocs/auth_cubit.dart';

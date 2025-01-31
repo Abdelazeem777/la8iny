@@ -1,4 +1,4 @@
-import 'package:la8iny/auth/presentation/repo/auth_repo.dart';
+import 'package:la8iny/features/auth/presentation/repo/auth_repo.dart';
 
 import '../models/user_model.dart';
 
