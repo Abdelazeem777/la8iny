@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "588800713790",
+    "project_id": "la8iny",
+    "storage_bucket": "la8iny.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:588800713790:android:74f717d360157c5fc2dd6f",
+        "android_client_info": {
+          "package_name": "com.example.la8iny"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-vqBwp1QR5WWD2uKhtojuGKFQaT8SjYs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
