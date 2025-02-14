@@ -3,7 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:la8iny/features/auth/data/repo/auth_repo_impl.dart';
 import 'package:la8iny/core/di/service_locator.dart';
+import 'package:la8iny/features/auth/presentation/pages/signup_page.dart';
 
+import '../../../home/presentation/pages/home_page.dart';
 import '../blocs/auth_cubit.dart';
 
 class LoginPage extends StatefulWidget {
@@ -32,42 +34,42 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AuthCubit>(
-      create: (context) => sl<AuthCubit>(),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('Login'),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: BlocListener<AuthCubit, AuthState>(
-            listener: (context, state) {
-              if (state.isLoaded) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Welcome ${state.user?.fullname}'),
-                  ),
-                );
-              } else if (state.isError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message ?? "Error"),
-                  ),
-                );
-              }
-            },
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  _buildEmailField(),
-                  SizedBox(height: 16.0),
-                  _buildPasswordField(),
-                  SizedBox(height: 16.0),
-                  _buildLoginButton(),
-                ],
-              ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Login'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: BlocListener<AuthCubit, AuthState>(
+          listener: (context, state) {
+            if (state.isLoggedIn) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Welcome ${state.user?.fullname}'),
+                ),
+              );
+
+              _goToHomePage(context);
+            } else if (state.isError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message ?? "Error"),
+                ),
+              );
+            }
+          },
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _buildEmailField(),
+                SizedBox(height: 16.0),
+                _buildPasswordField(),
+                SizedBox(height: 16.0),
+                _buildLoginButton(),
+                _buildDontHaveAccount(),
+              ],
             ),
           ),
         ),
@@ -124,6 +126,27 @@ class _LoginPageState extends State<LoginPage> {
           child: Text(state.isLoading ? "Loading" : 'Login'),
         );
       },
+    );
+  }
+
+  Widget _buildDontHaveAccount() {
+    return TextButton(
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => SignupPage(),
+          ),
+        );
+      },
+      child: Text('Don\'t have an account? Sign up'),
+    );
+  }
+
+  void _goToHomePage(BuildContext context) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => HomePage(),
+      ),
     );
   }
 }

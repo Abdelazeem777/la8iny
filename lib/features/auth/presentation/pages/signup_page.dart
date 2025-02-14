@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:la8iny/core/di/service_locator.dart';
+import 'package:la8iny/features/home/presentation/pages/home_page.dart';
 
 import '../blocs/auth_cubit.dart';
 
@@ -34,44 +35,44 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AuthCubit>(
-      create: (context) => sl<AuthCubit>(),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Signup'),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: BlocListener<AuthCubit, AuthState>(
-            listener: (context, state) {
-              if (state.isLoaded) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Welcome ${state.user?.fullname}'),
-                  ),
-                );
-              } else if (state.isError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message ?? "Error"),
-                  ),
-                );
-              }
-            },
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  _buildEmailFullnameField(),
-                  const SizedBox(height: 16.0),
-                  _buildEmailField(),
-                  const SizedBox(height: 16.0),
-                  _buildPasswordField(),
-                  const SizedBox(height: 16.0),
-                  _buildLoginButton(),
-                ],
-              ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Signup'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: BlocListener<AuthCubit, AuthState>(
+          listener: (context, state) {
+            if (state.isLoggedIn) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Welcome ${state.user?.fullname}'),
+                ),
+              );
+
+              _goToHomePage(context);
+            } else if (state.isError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message ?? "Error"),
+                ),
+              );
+            }
+          },
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _buildEmailFullnameField(),
+                const SizedBox(height: 16.0),
+                _buildEmailField(),
+                const SizedBox(height: 16.0),
+                _buildPasswordField(),
+                const SizedBox(height: 16.0),
+                _buildSignupButton(),
+                _buildAlreadyHaveAccount(),
+              ],
             ),
           ),
         ),
@@ -128,7 +129,7 @@ class _SignupPageState extends State<SignupPage> {
     );
   }
 
-  Widget _buildLoginButton() {
+  Widget _buildSignupButton() {
     return BlocBuilder<AuthCubit, AuthState>(
       buildWhen: (previousState, currentState) {
         return previousState != currentState;
@@ -138,15 +139,33 @@ class _SignupPageState extends State<SignupPage> {
         return ElevatedButton(
           onPressed: () {
             if (_formKey.currentState!.validate()) {
-              cubit.login(
-                _emailController.text,
-                _passwordController.text,
+              cubit.signup(
+                fullname: _fullNameController.text,
+                email: _emailController.text,
+                password: _passwordController.text,
               );
             }
           },
           child: Text(state.isLoading ? "Loading" : 'Signup'),
         );
       },
+    );
+  }
+
+  Widget _buildAlreadyHaveAccount() {
+    return TextButton(
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+      child: Text('Already have an account? Login'),
+    );
+  }
+
+  void _goToHomePage(BuildContext context) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => HomePage(),
+      ),
     );
   }
 }
