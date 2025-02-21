@@ -11,6 +11,25 @@ abstract class RemoteDatabaseService {
     Map<String, dynamic> Function(T) toMap,
   );
   Future<void> delete(String path);
+  Future<void> update(String path, Map<String, dynamic> data);
+  Future<DocumentSnapshot<Map<String, dynamic>>?> getDocument(String path);
+  Stream<Map<String, dynamic>?> watchDocument(String path);
+  Stream<List<T>> watchCollection<T>(
+    String path,
+    T Function(Map<String, dynamic>) fromMap, {
+    Query<Map<String, dynamic>> Function(Query<Map<String, dynamic>>)?
+        queryBuilder,
+  });
+  Future<List<T>> getCollectionPaginated<T>(
+    String path,
+    T Function(Map<String, dynamic>) fromMap, {
+    Query<Map<String, dynamic>> Function(Query<Map<String, dynamic>>)?
+        queryBuilder,
+    DocumentSnapshot<Map<String, dynamic>>? startAfterDocument,
+  });
+  Future<void> runTransaction(
+    Future<void> Function(Transaction) action,
+  );
 }
 
 class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
@@ -44,5 +63,62 @@ class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
     Map<String, dynamic> Function(T) toMap,
   ) async {
     await _firestore.doc(path).set(toMap(data));
+  }
+
+  @override
+  Future<void> update(String path, Map<String, dynamic> data) async {
+    await _firestore.doc(path).update(data);
+  }
+
+  @override
+  Future<DocumentSnapshot<Map<String, dynamic>>?> getDocument(
+      String path) async {
+    return _firestore.doc(path).get();
+  }
+
+  @override
+  Stream<Map<String, dynamic>?> watchDocument(String path) {
+    return _firestore.doc(path).snapshots().map((snapshot) => snapshot.data());
+  }
+
+  @override
+  Stream<List<T>> watchCollection<T>(
+    String path,
+    T Function(Map<String, dynamic>) fromMap, {
+    Query<Map<String, dynamic>> Function(Query<Map<String, dynamic>>)?
+        queryBuilder,
+  }) {
+    Query<Map<String, dynamic>> query = _firestore.collection(path);
+    if (queryBuilder != null) {
+      query = queryBuilder(query);
+    }
+
+    return query.snapshots().map(
+        (snapshot) => snapshot.docs.map((doc) => fromMap(doc.data())).toList());
+  }
+
+  @override
+  Future<List<T>> getCollectionPaginated<T>(
+    String path,
+    T Function(Map<String, dynamic>) fromMap, {
+    Query<Map<String, dynamic>> Function(Query<Map<String, dynamic>>)?
+        queryBuilder,
+    DocumentSnapshot<Map<String, dynamic>>? startAfterDocument,
+  }) async {
+    Query<Map<String, dynamic>> query = _firestore.collection(path);
+    if (queryBuilder != null) {
+      query = queryBuilder(query);
+    }
+    if (startAfterDocument != null) {
+      query = query.startAfterDocument(startAfterDocument);
+    }
+
+    final snapshot = await query.get();
+    return snapshot.docs.map((doc) => fromMap(doc.data())).toList();
+  }
+
+  @override
+  Future<void> runTransaction(Future<void> Function(Transaction) action) {
+    return _firestore.runTransaction(action);
   }
 }

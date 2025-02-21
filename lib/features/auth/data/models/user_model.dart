@@ -4,21 +4,30 @@ class User {
   final String id;
   final String fullname;
   final String email;
+  final bool isOnline;
+  final DateTime lastSeen;
+
   User({
     required this.id,
     required this.fullname,
     required this.email,
-  });
+    this.isOnline = false,
+    DateTime? lastSeen,
+  }) : lastSeen = lastSeen ?? DateTime.now();
 
   User copyWith({
     String? id,
     String? fullname,
     String? email,
+    bool? isOnline,
+    DateTime? lastSeen,
   }) {
     return User(
       id: id ?? this.id,
       fullname: fullname ?? this.fullname,
       email: email ?? this.email,
+      isOnline: isOnline ?? this.isOnline,
+      lastSeen: lastSeen ?? this.lastSeen,
     );
   }
 
@@ -27,6 +36,8 @@ class User {
       'id': id,
       'fullname': fullname,
       'email': email,
+      'isOnline': isOnline,
+      'lastSeen': lastSeen.toIso8601String(),
     };
   }
 
@@ -35,6 +46,9 @@ class User {
       id: map['id'] ?? '',
       fullname: map['fullname'] ?? '',
       email: map['email'] ?? '',
+      isOnline: map['isOnline'] ?? false,
+      lastSeen:
+          map['lastSeen'] != null ? DateTime.parse(map['lastSeen']) : null,
     );
   }
 
@@ -43,7 +57,9 @@ class User {
   factory User.fromJson(String source) => User.fromMap(json.decode(source));
 
   @override
-  String toString() => 'User(id: $id, fullname: $fullname, email: $email)';
+  String toString() {
+    return 'User(id: $id, fullname: $fullname, email: $email, isOnline: $isOnline, lastSeen: $lastSeen)';
+  }
 
   @override
   bool operator ==(Object other) {
@@ -52,9 +68,17 @@ class User {
     return other is User &&
         other.id == id &&
         other.fullname == fullname &&
-        other.email == email;
+        other.email == email &&
+        other.isOnline == isOnline &&
+        other.lastSeen == lastSeen;
   }
 
   @override
-  int get hashCode => id.hashCode ^ fullname.hashCode ^ email.hashCode;
+  int get hashCode {
+    return id.hashCode ^
+        fullname.hashCode ^
+        email.hashCode ^
+        isOnline.hashCode ^
+        lastSeen.hashCode;
+  }
 }

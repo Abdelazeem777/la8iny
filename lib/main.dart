@@ -6,6 +6,7 @@ import 'package:la8iny/features/splash_screen/presentation/pages/splash_screen_p
 
 import 'features/auth/presentation/pages/login_page.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'features/chat/presentation/blocs/chat_cubit.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -21,8 +22,15 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AuthCubit>(
-      create: (context) => sl<AuthCubit>()..init(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthCubit>(
+          create: (context) => sl<AuthCubit>()..init(),
+        ),
+        BlocProvider(
+          create: (context) => sl<ChatCubit>(),
+        ),
+      ],
       child: MaterialApp(
         title: 'Login Page',
         theme: ThemeData(
