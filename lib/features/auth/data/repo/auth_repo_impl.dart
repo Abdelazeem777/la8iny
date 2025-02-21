@@ -47,6 +47,9 @@ class AuthRepoImpl implements AuthRepo {
 
   @override
   Future<void> logout() {
-    return _authRemoteDataSource.logout();
+    return Future.wait([
+      _authRemoteDataSource.logout(),
+      _authLocalDataSource.removeCachedUser(),
+    ]);
   }
 }

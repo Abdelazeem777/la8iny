@@ -5,6 +5,7 @@ import '../../../../core/services/cache_service.dart';
 abstract class AuthLocalDataSource {
   Future<void> cacheUser(User user);
   Future<User?> getCachedUser();
+  Future<void> removeCachedUser();
 }
 
 const String USER_CACHE_KEY = 'USER_CACHE_KEY';
@@ -27,5 +28,10 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     }
 
     return User.fromJson(userJson);
+  }
+
+  @override
+  Future<void> removeCachedUser() {
+    return _cacheService.remove(USER_CACHE_KEY);
   }
 }
