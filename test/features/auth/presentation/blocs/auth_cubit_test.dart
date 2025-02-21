@@ -13,16 +13,21 @@ class MockAuthRepository extends Mock implements AuthRepo {}
 class FakeAuthRepository implements AuthRepo {
   final _users = [
     User(
+      id: "test-user-id",
       fullname: "Abdelazeem Kuratem",
       email: "test@gmail.com",
     ),
   ];
+
+  User? _currentUser;
+
   @override
   Future<User> login(String email, String password) {
     final user = _users.firstWhereOrNull(
       (user) => user.email == email,
     );
     if (user?.email == email) {
+      _currentUser = user;
       return Future.value(user);
     } else {
       throw Exception("User password is incorrect");
@@ -31,19 +36,41 @@ class FakeAuthRepository implements AuthRepo {
 
   @override
   Future<User> signup(String fullname, String email, String password) {
-    final user = User(fullname: fullname, email: email);
-    if (_users.contains(user)) {
+    final user = User(
+      id: "user-${_users.length + 1}",
+      fullname: fullname,
+      email: email,
+    );
+    if (_users.any((u) => u.email == email)) {
       throw Exception("This email is already in use");
     } else {
       _users.add(user);
+      _currentUser = user;
       return Future.value(user);
     }
+  }
+
+  @override
+  Future<User?> getUser() async {
+    return _currentUser;
+  }
+
+  @override
+  Future<void> logout() async {
+    _currentUser = null;
   }
 }
 
 void main() {
   late AuthRepo _authRepository;
   late AuthCubit _authCubit;
+
+  setUpAll(() {
+    registerFallbackValue('test@gmail.com');
+    registerFallbackValue('123456');
+    registerFallbackValue('Abdelazeem Kuratem');
+  });
+
   group("Using Fake", () {
     setUp(() {
       _authRepository = FakeAuthRepository();
@@ -56,14 +83,15 @@ void main() {
 
     group("login", () {
       blocTest(
-        'emits [AuthStatus.loading, AuthStatus.loaded] when login is successful',
+        'emits [AuthStatus.loading, AuthStatus.loggedIn] when login is successful',
         build: () => _authCubit,
         act: (cubit) => cubit.login("test@gmail.com", "123456"),
         expect: () => [
           AuthState(status: AuthStatus.loading),
           AuthState(
-            status: AuthStatus.loaded,
+            status: AuthStatus.loggedIn,
             user: User(
+              id: "test-user-id",
               fullname: "Abdelazeem Kuratem",
               email: "test@gmail.com",
             ),
@@ -87,7 +115,7 @@ void main() {
 
     group("signup", () {
       blocTest(
-        'emits [AuthStatus.loading, AuthStatus.loaded] when signup is successful',
+        'emits [AuthStatus.loading, AuthStatus.loggedIn] when signup is successful',
         build: () => _authCubit,
         act: (cubit) => cubit.signup(
           fullname: "Abdelazeem Kuratem",
@@ -97,8 +125,9 @@ void main() {
         expect: () => [
           AuthState(status: AuthStatus.loading),
           AuthState(
-            status: AuthStatus.loaded,
+            status: AuthStatus.loggedIn,
             user: User(
+              id: "user-2",
               fullname: "Abdelazeem Kuratem",
               email: "abdelazeem263@gmail.com",
             ),
@@ -110,9 +139,10 @@ void main() {
         'emits [AuthStatus.loading, AuthStatus.error] when signup is failed',
         build: () => _authCubit,
         act: (cubit) => cubit.signup(
-            fullname: "Abdelazeem Kuratem",
-            email: "test@gmail.com",
-            password: "123456"),
+          fullname: "Abdelazeem Kuratem",
+          email: "test@gmail.com",
+          password: "123456",
+        ),
         expect: () => [
           AuthState(status: AuthStatus.loading),
           AuthState(
@@ -123,7 +153,7 @@ void main() {
       );
 
       blocTest(
-        'emits [AuthStatus.loading, AuthStatus.loaded,AuthStatus.loading, AuthStatus.loaded] when signup is successful and login is successful',
+        'emits [AuthStatus.loading, AuthStatus.loggedIn] when signup is successful and login is successful',
         build: () => _authCubit,
         act: (cubit) async {
           await cubit.signup(
@@ -138,8 +168,9 @@ void main() {
           return [
             authState,
             authState.copyWith(
-              status: AuthStatus.loaded,
+              status: AuthStatus.loggedIn,
               user: () => User(
+                id: "user-2",
                 fullname: "Abdelazeem Kuratem2",
                 email: "test2@gmail.com",
               ),
@@ -147,13 +178,15 @@ void main() {
             authState.copyWith(
               status: AuthStatus.loading,
               user: () => User(
+                id: "user-2",
                 fullname: "Abdelazeem Kuratem2",
                 email: "test2@gmail.com",
               ),
             ),
             authState.copyWith(
-              status: AuthStatus.loaded,
+              status: AuthStatus.loggedIn,
               user: () => User(
+                id: "user-2",
                 fullname: "Abdelazeem Kuratem2",
                 email: "test2@gmail.com",
               ),
@@ -176,19 +209,24 @@ void main() {
 
     group("login", () {
       blocTest(
-        'emits [AuthStatus.loading, AuthStatus.loaded] when login is successful',
-        setUp: () => when(() => _authRepository.login(any(), any()))
-            .thenAnswer((_) async => User(
-                  fullname: "Abdelazeem Kuratem",
-                  email: "test@gmail.com",
-                )),
+        'emits [AuthStatus.loading, AuthStatus.loggedIn] when login is successful',
+        setUp: () {
+          when(() => _authRepository.login(any(), any())).thenAnswer(
+            (_) async => User(
+              id: "test-user-id",
+              fullname: "Abdelazeem Kuratem",
+              email: "test@gmail.com",
+            ),
+          );
+        },
         build: () => _authCubit,
         act: (cubit) => cubit.login("test@gmail.com", "123456"),
         expect: () => [
           AuthState(status: AuthStatus.loading),
           AuthState(
-            status: AuthStatus.loaded,
+            status: AuthStatus.loggedIn,
             user: User(
+              id: "test-user-id",
               fullname: "Abdelazeem Kuratem",
               email: "test@gmail.com",
             ),
@@ -198,10 +236,11 @@ void main() {
 
       blocTest(
         'emits [AuthStatus.loading, AuthStatus.error] when login is failed',
-        setUp: () =>
-            when(() => _authRepository.login("test@gmail.com", "123456"))
-                .thenAnswer(
-                    (_) async => throw Exception("User password is incorrect")),
+        setUp: () {
+          when(() => _authRepository.login(any(), any())).thenThrow(
+            Exception("User password is incorrect"),
+          );
+        },
         build: () => _authCubit,
         act: (cubit) => cubit.login("test@gmail.com", "123456"),
         expect: () => [
@@ -216,12 +255,16 @@ void main() {
 
     group("signup", () {
       blocTest(
-        'emits [AuthStatus.loading, AuthStatus.loaded] when signup is successful',
-        setUp: () => when(() => _authRepository.signup(any(), any(), any()))
-            .thenAnswer((_) async => User(
-                  fullname: "Abdelazeem Kuratem",
-                  email: "test@gmail.com",
-                )),
+        'emits [AuthStatus.loading, AuthStatus.loggedIn] when signup is successful',
+        setUp: () {
+          when(() => _authRepository.signup(any(), any(), any())).thenAnswer(
+            (_) async => User(
+              id: "test-user-id",
+              fullname: "Abdelazeem Kuratem",
+              email: "test@gmail.com",
+            ),
+          );
+        },
         build: () => _authCubit,
         act: (cubit) => cubit.signup(
           fullname: "Abdelazeem Kuratem",
@@ -231,8 +274,9 @@ void main() {
         expect: () => [
           AuthState(status: AuthStatus.loading),
           AuthState(
-            status: AuthStatus.loaded,
+            status: AuthStatus.loggedIn,
             user: User(
+              id: "test-user-id",
               fullname: "Abdelazeem Kuratem",
               email: "test@gmail.com",
             ),
@@ -242,17 +286,96 @@ void main() {
 
       blocTest(
         'emits [AuthStatus.loading, AuthStatus.error] when signup is failed',
-        setUp: () =>
-            when(() => _authRepository.login("test@gmail.com", "123456"))
-                .thenAnswer((_) async =>
-                    throw Exception("This email is already in use")),
+        setUp: () {
+          when(() => _authRepository.signup(any(), any(), any())).thenThrow(
+            Exception("This email is already in use"),
+          );
+        },
         build: () => _authCubit,
-        act: (cubit) => cubit.login("test@gmail.com", "123456"),
+        act: (cubit) => cubit.signup(
+          fullname: "Abdelazeem Kuratem",
+          email: "test@gmail.com",
+          password: "123456",
+        ),
         expect: () => [
           AuthState(status: AuthStatus.loading),
           AuthState(
             status: AuthStatus.error,
             message: "Exception: This email is already in use",
+          ),
+        ],
+      );
+    });
+
+    group("getUser", () {
+      blocTest<AuthCubit, AuthState>(
+        'emits [AuthStatus.loggedIn] when user exists',
+        setUp: () {
+          when(() => _authRepository.getUser()).thenAnswer(
+            (_) async => User(
+              id: "test-user-id",
+              fullname: "Abdelazeem Kuratem",
+              email: "test@gmail.com",
+            ),
+          );
+        },
+        build: () => _authCubit,
+        act: (cubit) => cubit.init(),
+        expect: () => [
+          AuthState(
+            status: AuthStatus.loggedIn,
+            user: User(
+              id: "test-user-id",
+              fullname: "Abdelazeem Kuratem",
+              email: "test@gmail.com",
+            ),
+          ),
+        ],
+      );
+
+      blocTest<AuthCubit, AuthState>(
+        'emits [AuthStatus.loggedOut] when user does not exist',
+        setUp: () {
+          when(() => _authRepository.getUser()).thenAnswer(
+            (_) async => null,
+          );
+        },
+        build: () => _authCubit,
+        act: (cubit) => cubit.init(),
+        expect: () => [
+          AuthState(status: AuthStatus.loggedOut),
+        ],
+      );
+    });
+
+    group("logout", () {
+      blocTest<AuthCubit, AuthState>(
+        'emits [AuthStatus.loggedOut] when logout is successful',
+        setUp: () {
+          when(() => _authRepository.logout()).thenAnswer(
+            (_) async => {},
+          );
+        },
+        build: () => _authCubit,
+        act: (cubit) => cubit.logout(),
+        expect: () => [
+          AuthState(status: AuthStatus.loggedOut),
+        ],
+      );
+
+      blocTest<AuthCubit, AuthState>(
+        'emits [AuthStatus.error] when logout fails',
+        setUp: () {
+          when(() => _authRepository.logout()).thenThrow(
+            Exception("Failed to logout"),
+          );
+        },
+        build: () => _authCubit,
+        act: (cubit) => cubit.logout(),
+        expect: () => [
+          AuthState(
+            status: AuthStatus.error,
+            message: "Exception: Failed to logout",
           ),
         ],
       );
