@@ -11,11 +11,15 @@ import 'package:mocktail/mocktail.dart';
 class MockAuthRepository extends Mock implements AuthRepo {}
 
 class FakeAuthRepository implements AuthRepo {
+  // Fixed datetime for testing
+  final DateTime _fixedDateTime = DateTime(2025, 4, 11, 18, 54, 30);
+
   final _users = [
     User(
       id: "test-user-id",
       fullname: "Abdelazeem Kuratem",
       email: "test@gmail.com",
+      lastSeen: DateTime(2025, 4, 11, 18, 54, 30),
     ),
   ];
 
@@ -40,6 +44,7 @@ class FakeAuthRepository implements AuthRepo {
       id: "user-${_users.length + 1}",
       fullname: fullname,
       email: email,
+      lastSeen: _fixedDateTime,
     );
     if (_users.any((u) => u.email == email)) {
       throw Exception("This email is already in use");
@@ -64,6 +69,8 @@ class FakeAuthRepository implements AuthRepo {
 void main() {
   late AuthRepo _authRepository;
   late AuthCubit _authCubit;
+  // Fixed datetime for testing
+  final DateTime fixedDateTime = DateTime(2025, 4, 11, 18, 54, 30);
 
   setUpAll(() {
     registerFallbackValue('test@gmail.com');
@@ -94,6 +101,7 @@ void main() {
               id: "test-user-id",
               fullname: "Abdelazeem Kuratem",
               email: "test@gmail.com",
+              lastSeen: fixedDateTime,
             ),
           ),
         ],
@@ -130,6 +138,7 @@ void main() {
               id: "user-2",
               fullname: "Abdelazeem Kuratem",
               email: "abdelazeem263@gmail.com",
+              lastSeen: fixedDateTime,
             ),
           ),
         ],
@@ -173,6 +182,7 @@ void main() {
                 id: "user-2",
                 fullname: "Abdelazeem Kuratem2",
                 email: "test2@gmail.com",
+                lastSeen: fixedDateTime,
               ),
             ),
             authState.copyWith(
@@ -181,6 +191,7 @@ void main() {
                 id: "user-2",
                 fullname: "Abdelazeem Kuratem2",
                 email: "test2@gmail.com",
+                lastSeen: fixedDateTime,
               ),
             ),
             authState.copyWith(
@@ -189,6 +200,7 @@ void main() {
                 id: "user-2",
                 fullname: "Abdelazeem Kuratem2",
                 email: "test2@gmail.com",
+                lastSeen: fixedDateTime,
               ),
             ),
           ];
@@ -216,6 +228,7 @@ void main() {
               id: "test-user-id",
               fullname: "Abdelazeem Kuratem",
               email: "test@gmail.com",
+              lastSeen: fixedDateTime,
             ),
           );
         },
@@ -229,6 +242,7 @@ void main() {
               id: "test-user-id",
               fullname: "Abdelazeem Kuratem",
               email: "test@gmail.com",
+              lastSeen: fixedDateTime,
             ),
           ),
         ],
@@ -262,6 +276,7 @@ void main() {
               id: "test-user-id",
               fullname: "Abdelazeem Kuratem",
               email: "test@gmail.com",
+              lastSeen: fixedDateTime,
             ),
           );
         },
@@ -279,6 +294,7 @@ void main() {
               id: "test-user-id",
               fullname: "Abdelazeem Kuratem",
               email: "test@gmail.com",
+              lastSeen: fixedDateTime,
             ),
           ),
         ],
@@ -316,6 +332,7 @@ void main() {
               id: "test-user-id",
               fullname: "Abdelazeem Kuratem",
               email: "test@gmail.com",
+              lastSeen: fixedDateTime,
             ),
           );
         },
@@ -328,6 +345,7 @@ void main() {
               id: "test-user-id",
               fullname: "Abdelazeem Kuratem",
               email: "test@gmail.com",
+              lastSeen: fixedDateTime,
             ),
           ),
         ],
