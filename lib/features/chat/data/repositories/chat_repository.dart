@@ -7,16 +7,16 @@ abstract class ChatRepository {
   Stream<List<ChatRoom>> getChatRooms(String userId);
   Future<List<ChatRoom>> getChatRoomsPaginated(String userId,
       {int limit = 20, String? lastRoomId});
-  Stream<List<ChatMessage>> getChatMessages(String roomId);
+  Stream<List<ChatMessage>> listenToChatMessages(String roomId);
   Future<List<ChatMessage>> getChatMessagesPaginated(String roomId,
       {int limit = 20, String? lastMessageId});
-  Future<void> sendMessage(ChatMessage message);
-  Future<void> markMessageAsRead(String messageId);
+  Future<void> sendMessage(String roomId, ChatMessage message);
+  Future<void> markMessageAsRead(String roomId, String messageId);
   Future<void> updateUserOnlineStatus(String userId, bool isOnline);
   Future<void> updateUserLastSeen(String userId);
   Stream<bool> getUserOnlineStatus(String userId);
 
-  Future<void> createChat({
+  Future<ChatRoom> createChat({
     required User targetUser,
     required User currentUser,
   });

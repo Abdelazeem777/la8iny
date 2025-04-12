@@ -64,28 +64,6 @@ class ChatCubit extends Cubit<ChatState> {
     }
   }
 
-  Future<void> sendMessage(ChatMessage message) async {
-    try {
-      await _chatRepository.sendMessage(message);
-    } catch (error) {
-      emit(state.copyWith(
-        status: ChatStatus.error,
-        error: error.toString(),
-      ));
-    }
-  }
-
-  Future<void> markMessageAsRead(String messageId) async {
-    try {
-      await _chatRepository.markMessageAsRead(messageId);
-    } catch (error) {
-      emit(state.copyWith(
-        status: ChatStatus.error,
-        error: error.toString(),
-      ));
-    }
-  }
-
   Future<void> updateUserOnlineStatus(String userId, bool isOnline) async {
     try {
       await _chatRepository.updateUserOnlineStatus(userId, isOnline);
@@ -108,10 +86,12 @@ class ChatCubit extends Cubit<ChatState> {
     required User currentUser,
   }) async {
     try {
-      await _chatRepository.createChat(
+      final room = await _chatRepository.createChat(
         targetUser: targetUser,
         currentUser: currentUser,
       );
+
+      emit(state.copyWith(chatRoom: room));
     } catch (error) {
       emit(state.copyWith(
         status: ChatStatus.error,

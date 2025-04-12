@@ -27,8 +27,8 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Stream<List<ChatMessage>> getChatMessages(String roomId) {
-    return _chatRemoteDataSource.getChatMessages(roomId);
+  Stream<List<ChatMessage>> listenToChatMessages(String roomId) {
+    return _chatRemoteDataSource.listenToChatMessages(roomId);
   }
 
   @override
@@ -39,13 +39,13 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<void> sendMessage(ChatMessage message) async {
-    return _chatRemoteDataSource.sendMessage(message);
+  Future<void> sendMessage(String roomId, ChatMessage message) async {
+    return _chatRemoteDataSource.sendMessage(roomId, message);
   }
 
   @override
-  Future<void> markMessageAsRead(String messageId) async {
-    return _chatRemoteDataSource.markMessageAsRead(messageId);
+  Future<void> markMessageAsRead(String roomId, String messageId) async {
+    return _chatRemoteDataSource.markMessageAsRead(roomId, messageId);
   }
 
   @override
@@ -64,7 +64,7 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Future<void> createChat({
+  Future<ChatRoom> createChat({
     required User targetUser,
     required User currentUser,
   }) {

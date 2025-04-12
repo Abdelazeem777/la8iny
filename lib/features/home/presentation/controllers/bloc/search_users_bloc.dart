@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../../auth/data/models/user_model.dart';
+import '../../../../chat/data/models/chat_room.dart';
 import '../../../data/repositories/home_repository.dart';
 
 part 'search_users_event.dart';

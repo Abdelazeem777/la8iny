@@ -19,7 +19,6 @@ class SearchUsersState {
   final SearchUsersStatus status;
   final List<User>? users;
   final String? errorMessage;
-
   const SearchUsersState({
     this.status = SearchUsersStatus.initial,
     this.users,
@@ -30,6 +29,7 @@ class SearchUsersState {
     SearchUsersStatus? status,
     List<User>? users,
     String? errorMessage,
+    ChatRoom? chatRoom,
   }) {
     return SearchUsersState(
       status: status ?? this.status,

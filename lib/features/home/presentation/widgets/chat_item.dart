@@ -11,7 +11,8 @@ class ChatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentUserId = context.read<AuthCubit>().state.user?.id;
+    final currentUser = context.read<AuthCubit>().state.user;
+    final currentUserId = currentUser?.id;
     if (currentUserId == null) return const SizedBox();
 
     final otherParticipantId =
@@ -27,7 +28,9 @@ class ChatItem extends StatelessWidget {
       subtitle: Text(
         otherParticipant.isOnline ? 'Online' : 'Offline',
         style: TextStyle(
-          color: otherParticipant.isOnline ? Colors.green : Colors.grey,
+          color: otherParticipant.isOnline
+              ? const Color.fromARGB(255, 46, 89, 47)
+              : Colors.grey,
         ),
       ),
       onTap: () {
@@ -36,6 +39,7 @@ class ChatItem extends StatelessWidget {
             builder: (context) => ChatRoomPage(
               room: room,
               otherParticipant: otherParticipant,
+              currentUser: currentUser!,
             ),
           ),
         );

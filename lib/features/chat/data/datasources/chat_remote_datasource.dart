@@ -7,16 +7,16 @@ abstract class ChatRemoteDataSource {
   Stream<List<ChatRoom>> getChatRooms(String userId);
   Future<List<ChatRoom>> getChatRoomsPaginated(String userId,
       {int limit = 20, String? lastRoomId});
-  Stream<List<ChatMessage>> getChatMessages(String roomId);
+  Stream<List<ChatMessage>> listenToChatMessages(String roomId);
   Future<List<ChatMessage>> getChatMessagesPaginated(String roomId,
       {int limit = 20, String? lastMessageId});
-  Future<void> sendMessage(ChatMessage message);
-  Future<void> markMessageAsRead(String messageId);
+  Future<void> sendMessage(String roomId, ChatMessage message);
+  Future<void> markMessageAsRead(String roomId, String messageId);
   Future<void> updateUserOnlineStatus(String userId, bool isOnline);
   Future<void> updateUserLastSeen(String userId);
   Stream<bool> getUserOnlineStatus(String userId);
 
-  Future<void> createChat({
+  Future<ChatRoom> createChat({
     required User targetUser,
     required User currentUser,
   });
@@ -59,7 +59,7 @@ class ChatRemoteDataSourceImpl extends ChatRemoteDataSource {
   }
 
   @override
-  Stream<List<ChatMessage>> getChatMessages(String roomId) {
+  Stream<List<ChatMessage>> listenToChatMessages(String roomId) {
     return _remoteDatabase.watchCollection(
       'chatRooms/$roomId/messages',
       ChatMessage.fromMap,
@@ -85,15 +85,15 @@ class ChatRemoteDataSourceImpl extends ChatRemoteDataSource {
   }
 
   @override
-  Future<void> sendMessage(ChatMessage message) async {
+  Future<void> sendMessage(String roomId, ChatMessage message) async {
     await _remoteDatabase.set(
-      'chatRooms/${message.id}/messages/${message.id}',
+      'chatRooms/$roomId/messages/${message.id}',
       message,
       (message) => message.toMap(),
     );
 
     await _remoteDatabase.update(
-      'chatRooms/${message.id}',
+      'chatRooms/$roomId',
       {
         'lastMessage': message.toMap(),
         'updatedAt': DateTime.now().toIso8601String(),
@@ -102,7 +102,7 @@ class ChatRemoteDataSourceImpl extends ChatRemoteDataSource {
   }
 
   @override
-  Future<void> markMessageAsRead(String messageId) async {
+  Future<void> markMessageAsRead(String roomId, String messageId) async {
     // Implementation depends on your message structure
     // You might need to update both the message and the chat room
     throw UnimplementedError();
@@ -131,13 +131,13 @@ class ChatRemoteDataSourceImpl extends ChatRemoteDataSource {
   }
 
   @override
-  Future<void> createChat({
+  Future<ChatRoom> createChat({
     required User targetUser,
     required User currentUser,
   }) async {
     final isExists = await _checkIfChatExists(targetUser, currentUser);
 
-    if (isExists) return;
+    if (isExists) throw Exception('Chat already exists');
 
     final chatRoomId = '${targetUser.id}_${currentUser.id}}';
 
@@ -152,11 +152,13 @@ class ChatRemoteDataSourceImpl extends ChatRemoteDataSource {
       updatedAt: DateTime.now(),
     );
 
-    return _remoteDatabase.set(
+    await _remoteDatabase.set(
       'chatRooms/$chatRoomId',
       chatRoom.toMap(),
       (data) => data,
     );
+
+    return chatRoom;
   }
 
   Future<bool> _checkIfChatExists(User targetUser, User currentUser) async {
@@ -164,7 +166,7 @@ class ChatRemoteDataSourceImpl extends ChatRemoteDataSource {
       'chatRooms',
       ChatRoom.fromMap,
       queryBuilder: (query) => query.where('participantIds',
-          arrayContainsAny: [targetUser.id, currentUser.id]),
+          arrayContains: [targetUser.id, currentUser.id]),
     );
 
     return chatRoom.isNotEmpty;
