@@ -16,6 +16,7 @@ import 'package:la8iny/features/chat/presentation/blocs/chat_room/chat_room_cubi
 import 'package:la8iny/core/services/remote_auth_service.dart';
 
 import '../../features/chat/data/datasources/chat_remote_datasource.dart';
+import '../../features/chat/presentation/blocs/drawing_board_bloc/drawing_board_bloc.dart';
 import '../../features/home/data/datasources/home_remote_data_source.dart';
 import '../../features/home/data/repositories/home_repository.dart';
 import '../../features/home/presentation/controllers/bloc/search_users_bloc.dart';
@@ -30,6 +31,8 @@ void initServiceLocator() {
     () => ChatRoomCubit(chatRepository: sl()),
   );
   sl.registerFactory(() => SearchUsersBloc(homeRepository: sl()));
+
+  sl.registerFactory(() => DrawingBoardBloc());
 
   // Repositories
   sl.registerLazySingleton<AuthRepo>(() => AuthRepoImpl(
