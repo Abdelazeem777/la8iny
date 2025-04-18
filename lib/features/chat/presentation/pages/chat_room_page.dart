@@ -116,7 +116,10 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
           onPressed: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => const RealTimeDrawingPage(),
+                builder: (context) => RealTimeDrawingPage(
+                  roomId: widget.room.id,
+                  userId: widget.currentUser.id,
+                ),
               ),
             );
           },

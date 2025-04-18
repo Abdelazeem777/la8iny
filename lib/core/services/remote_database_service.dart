@@ -20,6 +20,14 @@ abstract class RemoteDatabaseService {
     Query<Map<String, dynamic>> Function(Query<Map<String, dynamic>>)?
         queryBuilder,
   });
+
+  Stream<T> watchCollectionSingle<T>(
+    String path,
+    T Function(Map<String, dynamic>) fromMap, {
+    Query<Map<String, dynamic>> Function(Query<Map<String, dynamic>>)?
+        queryBuilder,
+  });
+
   Future<List<T>> getCollectionPaginated<T>(
     String path,
     T Function(Map<String, dynamic>) fromMap, {
@@ -95,6 +103,23 @@ class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
 
     return query.snapshots().map(
         (snapshot) => snapshot.docs.map((doc) => fromMap(doc.data())).toList());
+  }
+
+  @override
+  Stream<T> watchCollectionSingle<T>(
+    String path,
+    T Function(Map<String, dynamic>) fromMap, {
+    Query<Map<String, dynamic>> Function(Query<Map<String, dynamic>>)?
+        queryBuilder,
+  }) {
+    Query<Map<String, dynamic>> query = _firestore.collection(path);
+    if (queryBuilder != null) {
+      query = queryBuilder(query);
+    }
+
+    return query
+        .snapshots()
+        .map((snapshot) => fromMap(snapshot.docChanges.first.doc.data()!));
   }
 
   @override

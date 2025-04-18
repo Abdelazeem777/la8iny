@@ -3,10 +3,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:ui' as ui;
 
 import '../../../../core/di/service_locator.dart';
+import '../../data/models/drawing_point.dart';
 import '../blocs/drawing_board_bloc/drawing_board_bloc.dart';
 
 class RealTimeDrawingPage extends StatefulWidget {
-  const RealTimeDrawingPage({super.key});
+  const RealTimeDrawingPage({
+    super.key,
+    required this.roomId,
+    required this.userId,
+  });
+  final String roomId;
+  final String userId;
 
   @override
   State<RealTimeDrawingPage> createState() => _RealTimeDrawingPageState();
@@ -16,7 +23,8 @@ class _RealTimeDrawingPageState extends State<RealTimeDrawingPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => sl<DrawingBoardBloc>(),
+      create: (context) =>
+          sl<DrawingBoardBloc>()..add(InitDrawingBoardEvent(widget.roomId)),
       child: Builder(builder: (context) {
         final bloc = context.read<DrawingBoardBloc>();
         return Scaffold(
@@ -43,31 +51,39 @@ class _RealTimeDrawingPageState extends State<RealTimeDrawingPage> {
           builder: (context, color) {
             return GestureDetector(
               onPanStart: (details) {
-                bloc.add(DrawingBoardEventStart(
+                bloc.add(StartDrawingEvent(
                   DrawingPoint(
-                    details.localPosition,
-                    Paint()
+                    position: details.localPosition,
+                    paint: Paint()
                       ..color = color
                       ..isAntiAlias = true
                       ..strokeWidth = 5.0
                       ..strokeCap = StrokeCap.round,
+                    userId: widget.userId,
                   ),
                 ));
               },
               onPanUpdate: (details) {
-                bloc.add(DrawingBoardEventUpdate(
+                bloc.add(UpdateDrawingEvent(
                   DrawingPoint(
-                    details.localPosition,
-                    Paint()
+                    position: details.localPosition,
+                    paint: Paint()
                       ..color = color
                       ..isAntiAlias = true
                       ..strokeWidth = 5.0
                       ..strokeCap = StrokeCap.round,
+                    userId: widget.userId,
                   ),
                 ));
               },
               onPanEnd: (details) {
-                bloc.add(const DrawingBoardEventEnd());
+                bloc.add(UpdateDrawingEvent(
+                  DrawingPoint(
+                    position: null,
+                    paint: null,
+                    userId: widget.userId,
+                  ),
+                ));
               },
               child: BlocSelector<DrawingBoardBloc, DrawingBoardState,
                   List<DrawingPoint?>>(
@@ -168,19 +184,20 @@ class _DrawingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    print("size:" + size.toString());
+    print("drawing...");
     for (int i = 0; i < points.length - 1; i++) {
-      if (points[i] != null && points[i + 1] != null) {
+      if (points[i]?.position != null && points[i + 1]?.position != null) {
         canvas.drawLine(
-          points[i]!.position,
-          points[i + 1]!.position,
-          points[i]!.paint,
+          points[i]!.position!,
+          points[i + 1]!.position!,
+          points[i]!.paint!,
         );
-      } else if (points[i] != null && points[i + 1] == null) {
+      } else if (points[i]?.position != null &&
+          points[i + 1]?.position == null) {
         canvas.drawPoints(
           ui.PointMode.points,
-          [points[i]!.position],
-          points[i]!.paint,
+          [points[i]!.position!],
+          points[i]!.paint!,
         );
       }
     }
@@ -188,11 +205,4 @@ class _DrawingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _DrawingPainter oldDelegate) => true;
-}
-
-class DrawingPoint {
-  final Offset position;
-  final Paint paint;
-
-  const DrawingPoint(this.position, this.paint);
 }

@@ -16,6 +16,8 @@ import 'package:la8iny/features/chat/presentation/blocs/chat_room/chat_room_cubi
 import 'package:la8iny/core/services/remote_auth_service.dart';
 
 import '../../features/chat/data/datasources/chat_remote_datasource.dart';
+import '../../features/chat/data/datasources/drawing_board_remote_datasource.dart';
+import '../../features/chat/data/repositories/drawing_board_repository.dart';
 import '../../features/chat/presentation/blocs/drawing_board_bloc/drawing_board_bloc.dart';
 import '../../features/home/data/datasources/home_remote_data_source.dart';
 import '../../features/home/data/repositories/home_repository.dart';
@@ -32,7 +34,7 @@ void initServiceLocator() {
   );
   sl.registerFactory(() => SearchUsersBloc(homeRepository: sl()));
 
-  sl.registerFactory(() => DrawingBoardBloc());
+  sl.registerFactory(() => DrawingBoardBloc(sl()));
 
   // Repositories
   sl.registerLazySingleton<AuthRepo>(() => AuthRepoImpl(
@@ -48,6 +50,11 @@ void initServiceLocator() {
         homeRemoteDataSource: sl(),
       ));
 
+  sl.registerLazySingleton<DrawingBoardRepository>(
+      () => DrawingBoardRepositoryImpl(
+            drawingBoardRemoteDataSource: sl(),
+          ));
+
   // DataSources
   sl.registerLazySingleton<AuthRemoteDataSource>(
       () => AuthRemoteDataSourceImpl(sl()));
@@ -59,6 +66,8 @@ void initServiceLocator() {
       () => ChatRemoteDataSourceImpl(remoteDatabase: sl()));
   sl.registerLazySingleton<HomeRemoteDataSource>(
       () => HomeRemoteDataSourceImpl(remoteDatabase: sl()));
+  sl.registerLazySingleton<DrawingBoardRemoteDataSource>(
+      () => DrawingBoardRemoteDataSourceImpl(remoteDatabase: sl()));
 
   // Services
   sl.registerLazySingleton<RemoteAuthService>(
