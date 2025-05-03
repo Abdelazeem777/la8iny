@@ -1,4 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:la8iny/features/home/presentation/controllers/bloc/search_users_bloc.dart';
+import 'package:collection/collection.dart';
+import 'package:rxdart/rxdart.dart';
 
 abstract class RemoteDatabaseService {
   Future<T> get<T>(
@@ -117,9 +120,11 @@ class RemoteDatabaseServiceImpl implements RemoteDatabaseService {
       query = queryBuilder(query);
     }
 
-    return query
-        .snapshots()
-        .map((snapshot) => fromMap(snapshot.docChanges.first.doc.data()!));
+    return query.snapshots().map((snapshot) {
+      final doc = snapshot.docChanges.firstOrNull?.doc;
+      if (doc == null) return null;
+      return fromMap(doc.data()!);
+    }).whereType<T>();
   }
 
   @override
