@@ -77,7 +77,7 @@ class _RealTimeDrawingPageState extends State<RealTimeDrawingPage> {
                 ));
               },
               onPanEnd: (details) {
-                bloc.add(UpdateDrawingEvent(
+                bloc.add(StopDrawingEvent(
                   DrawingPoint(
                     position: null,
                     paint: null,

@@ -50,8 +50,18 @@ class DrawingBoardBloc extends Bloc<BoardEvent, DrawingBoardState> {
         },
       ).switchMap(mapper),
     );
+
+    on<StopDrawingEvent>(_onStopDrawingEvent);
+
     on<ClearBoardEvent>(_onClearBoardEvent);
     on<ChangeSelectedColorEvent>(_onChangeSelectedColorEvent);
+  }
+
+  @override
+  Future<void> close() async {
+    state.drawingBoardSubscription?.cancel();
+
+    super.close();
   }
 
   // Calculate Euclidean distance between two points
@@ -71,12 +81,13 @@ class DrawingBoardBloc extends Bloc<BoardEvent, DrawingBoardState> {
       final initPoints =
           await _drawingBoardRepository.initDrawingBoard(event.roomId);
 
-      _startListeningDrawingFromOtherUsers();
+      final drawingBoardSubscription = _startListeningDrawingFromOtherUsers();
 
       emit(state.copyWith(
         status: DrawingBoardStateStatus.loaded,
         points: initPoints,
         roomId: event.roomId,
+        drawingBoardSubscription: drawingBoardSubscription,
       ));
     } catch (e) {
       emit(state.copyWith(
@@ -86,10 +97,12 @@ class DrawingBoardBloc extends Bloc<BoardEvent, DrawingBoardState> {
     }
   }
 
-  void _startListeningDrawingFromOtherUsers() {
-    _drawingBoardRepository
+  StreamSubscription<DrawingPoint> _startListeningDrawingFromOtherUsers() {
+    final drawingBoardSubscription = _drawingBoardRepository
         .listenDrawingFromOtherUsers(state.roomId!)
         .listen((point) => add(ReceiveDrawingPointEvent(point)));
+
+    return drawingBoardSubscription;
   }
 
   void _onReceiveDrawingPointEvent(
@@ -109,6 +122,12 @@ class DrawingBoardBloc extends Bloc<BoardEvent, DrawingBoardState> {
     final newPoint = event.drawingPoint;
     _drawingBoardRepository.sendDrawingPoint(state.roomId!, newPoint);
     emit(state.copyWith(points: [...state.points, newPoint]));
+  }
+
+  void _onStopDrawingEvent(
+      StopDrawingEvent event, Emitter<DrawingBoardState> emit) {
+    _drawingBoardRepository.sendDrawingPoint(state.roomId!, event.drawingPoint);
+    emit(state.copyWith(points: [...state.points, event.drawingPoint]));
   }
 
   void _onClearBoardEvent(

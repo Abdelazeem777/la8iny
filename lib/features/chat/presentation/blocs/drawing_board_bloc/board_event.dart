@@ -22,6 +22,11 @@ class UpdateDrawingEvent extends BoardEvent {
   const UpdateDrawingEvent(this.drawingPoint);
 }
 
+class StopDrawingEvent extends BoardEvent {
+  final DrawingPoint drawingPoint;
+  const StopDrawingEvent(this.drawingPoint);
+}
+
 class ClearBoardEvent extends BoardEvent {
   const ClearBoardEvent();
 }

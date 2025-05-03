@@ -14,6 +14,7 @@ class DrawingBoardState {
   final Color selectedColor;
   final String? error;
   final String? roomId;
+  final StreamSubscription? drawingBoardSubscription;
 
   const DrawingBoardState({
     this.status = DrawingBoardStateStatus.initial,
@@ -21,6 +22,7 @@ class DrawingBoardState {
     this.selectedColor = Colors.black,
     this.error,
     this.roomId,
+    this.drawingBoardSubscription,
   });
 
   DrawingBoardState copyWith({
@@ -29,6 +31,7 @@ class DrawingBoardState {
     Color? selectedColor,
     String? error,
     String? roomId,
+    StreamSubscription? drawingBoardSubscription,
   }) {
     return DrawingBoardState(
       status: status ?? this.status,
@@ -36,12 +39,14 @@ class DrawingBoardState {
       selectedColor: selectedColor ?? this.selectedColor,
       error: error ?? this.error,
       roomId: roomId ?? this.roomId,
+      drawingBoardSubscription:
+          drawingBoardSubscription ?? this.drawingBoardSubscription,
     );
   }
 
   @override
   String toString() =>
-      'DrawingBoardState(status: $status, points: $points, selectedColor: $selectedColor, error: $error, roomId: $roomId)';
+      'DrawingBoardState(status: $status, points: $points, selectedColor: $selectedColor, error: $error, roomId: $roomId, drawingBoardSubscription: $drawingBoardSubscription)';
 
   @override
   bool operator ==(Object other) {
@@ -52,7 +57,8 @@ class DrawingBoardState {
         listEquals(other.points, points) &&
         other.selectedColor == selectedColor &&
         other.error == error &&
-        other.roomId == roomId;
+        other.roomId == roomId &&
+        other.drawingBoardSubscription == drawingBoardSubscription;
   }
 
   @override
@@ -61,5 +67,6 @@ class DrawingBoardState {
       Object.hashAll(points) ^
       selectedColor.hashCode ^
       error.hashCode ^
-      roomId.hashCode;
+      roomId.hashCode ^
+      drawingBoardSubscription.hashCode;
 }
