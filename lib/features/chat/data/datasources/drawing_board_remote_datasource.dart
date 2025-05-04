@@ -4,7 +4,10 @@ import '../models/drawing_point.dart';
 abstract class DrawingBoardRemoteDataSource {
   Future<List<DrawingPoint>> initDrawingBoard(String roomId);
   Future<void> sendDrawingPoint(String roomId, DrawingPoint point);
-  Stream<DrawingPoint> listenDrawingFromOtherUsers(String roomId);
+  Stream<DrawingPoint> listenDrawingFromOtherUsers(
+    String roomId,
+    String exceptUserId,
+  );
   Future<void> clearDrawingBoard(String roomId);
 }
 
@@ -24,11 +27,16 @@ class DrawingBoardRemoteDataSourceImpl extends DrawingBoardRemoteDataSource {
   }
 
   @override
-  Stream<DrawingPoint> listenDrawingFromOtherUsers(String roomId) {
+  Stream<DrawingPoint> listenDrawingFromOtherUsers(
+    String roomId,
+    String exceptUserId,
+  ) {
     return _remoteDatabase.watchCollectionSingle(
       "chatRooms/$roomId/drawingPoints",
       DrawingPoint.fromMap,
-      queryBuilder: (query) => query.orderBy('timestamp', descending: true),
+      queryBuilder: (query) => query
+          .where('userId', isNotEqualTo: exceptUserId)
+          .orderBy('timestamp', descending: true),
     );
   }
 

@@ -7,8 +7,9 @@ sealed class BoardEvent {
 
 class InitDrawingBoardEvent extends BoardEvent {
   final String roomId;
+  final String currentUserId;
 
-  const InitDrawingBoardEvent(this.roomId);
+  const InitDrawingBoardEvent(this.roomId, this.currentUserId);
 }
 
 class StartDrawingEvent extends BoardEvent {

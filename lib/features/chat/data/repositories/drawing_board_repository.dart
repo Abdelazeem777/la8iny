@@ -5,7 +5,10 @@ abstract class DrawingBoardRepository {
   Future<List<DrawingPoint>> initDrawingBoard(String roomId);
 
   Future<void> sendDrawingPoint(String roomId, DrawingPoint point);
-  Stream<DrawingPoint> listenDrawingFromOtherUsers(String roomId);
+  Stream<DrawingPoint> listenDrawingFromOtherUsers(
+    String roomId,
+    String exceptUserId,
+  );
   Future<void> clearDrawingBoard(String roomId);
 }
 
@@ -25,8 +28,10 @@ class DrawingBoardRepositoryImpl extends DrawingBoardRepository {
       _drawingBoardRemoteDataSource.sendDrawingPoint(roomId, point);
 
   @override
-  Stream<DrawingPoint> listenDrawingFromOtherUsers(String roomId) =>
-      _drawingBoardRemoteDataSource.listenDrawingFromOtherUsers(roomId);
+  Stream<DrawingPoint> listenDrawingFromOtherUsers(
+          String roomId, String exceptUserId) =>
+      _drawingBoardRemoteDataSource.listenDrawingFromOtherUsers(
+          roomId, exceptUserId);
 
   @override
   Future<void> clearDrawingBoard(String roomId) =>

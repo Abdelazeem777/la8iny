@@ -81,7 +81,8 @@ class DrawingBoardBloc extends Bloc<BoardEvent, DrawingBoardState> {
       final initPoints =
           await _drawingBoardRepository.initDrawingBoard(event.roomId);
 
-      final drawingBoardSubscription = _startListeningDrawingFromOtherUsers();
+      final drawingBoardSubscription =
+          _startListeningDrawingFromOtherUsers(event.currentUserId);
 
       emit(state.copyWith(
         status: DrawingBoardStateStatus.loaded,
@@ -97,9 +98,10 @@ class DrawingBoardBloc extends Bloc<BoardEvent, DrawingBoardState> {
     }
   }
 
-  StreamSubscription<DrawingPoint> _startListeningDrawingFromOtherUsers() {
+  StreamSubscription<DrawingPoint> _startListeningDrawingFromOtherUsers(
+      String currentUserId) {
     final drawingBoardSubscription = _drawingBoardRepository
-        .listenDrawingFromOtherUsers(state.roomId!)
+        .listenDrawingFromOtherUsers(state.roomId!, currentUserId)
         .listen((point) => add(ReceiveDrawingPointEvent(point)));
 
     return drawingBoardSubscription;

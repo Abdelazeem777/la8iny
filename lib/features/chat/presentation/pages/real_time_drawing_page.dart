@@ -23,8 +23,8 @@ class _RealTimeDrawingPageState extends State<RealTimeDrawingPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-          sl<DrawingBoardBloc>()..add(InitDrawingBoardEvent(widget.roomId)),
+      create: (context) => sl<DrawingBoardBloc>()
+        ..add(InitDrawingBoardEvent(widget.roomId, widget.userId)),
       child: Builder(builder: (context) {
         final bloc = context.read<DrawingBoardBloc>();
         return Scaffold(
